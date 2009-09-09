@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby
+
+def is_table_row(line)
+  /^\|/.match(line)
+end
+
+def split_row(line)
+  parts = line.strip.split("|")
+  parts.delete_at(0)
+  parts.each{|p| p.strip!}
+  parts
+end
+
+def format_table(table)
+  formatted = Array.new
+  widths = []; 
+
+  table.each do |line|
+    parts = split_row(line)    
+    parts.each_index do |i|
+      widths[i] = parts[i].length if widths[i] == nil || parts[i].length &gt; widths[i]
+    end
+  end
+
+  table.each do |line|
+    parts = split_row(line)
+    formatted_line = "| " 
+    
+    parts.each_index do |i|
+      formatted_line = "#{formatted_line}#{parts[i].ljust(widths[i])} | ";
+    end
+    
+    formatted &lt;&lt; formatted_line
+  end
+
+  formatted
+end
+
+def format_lines(lines)
+  formatted = Array.new
+  current_table = Array.new
+  current_number_of_columns = 0
+
+  lines.each do |line|
+    if is_table_row(line)
+      number_of_columns = split_row(line).size
+
+      if current_table.empty? || current_number_of_columns == number_of_columns
+        current_table &lt;&lt; line
+        current_number_of_columns = number_of_columns
+        next
+      end
+    end
+    
+    formatted &lt;&lt; format_table(current_table)
+    current_table = Array.new
+    
+    if(is_table_row(line))
+      current_table &lt;&lt; line
+      current_number_of_columns = split_row(line).size
+    else
+      formatted &lt;&lt; line
+    end
+  end
+  
+  formatted &lt;&lt; format_table(current_table)
+  formatted.flatten
+end
+
+puts format_lines(STDIN.readlines)
+
+require "test/unit"
+
+class FormatTableTest &lt; Test::Unit::TestCase
+  def test_format_single_table
+    actual = format_lines([
+      "|col1|col2|col3|",
+      "|col 1|col 2|col 3"
+    ])
+    
+    assert_equal([
+      "| col1  | col2  | col3  | ",
+      "| col 1 | col 2 | col 3 | "
+    ], actual)
+  end
+  
+  def test_format_table_with_different_number_of_columns
+    actual = format_lines([
+      "|table header|",
+      "|col1|col2|col3|",
+      "|col 1|col 2|col 3"
+    ])
+
+    assert_equal([
+      "| table header | ",
+      "| col1  | col2  | col3  | ",
+      "| col 1 | col 2 | col 3 | "
+    ], actual)
+  end
+
+  def test_format_table_with_non_table_data
+    actual = format_lines([
+      "foo",
+      "|col1|col2|col3|",
+      "|col 1|col 2|col 3",
+      "bar "
+    ])
+
+    assert_equal([
+      "foo",
+      "| col1  | col2  | col3  | ",
+      "| col 1 | col 2 | col 3 | ",
+      "bar "
+    ], actual)
+  end
+
+  def test_format_two_table
+    actual = format_lines([
+      "|col1|col2|col3|",
+      "|col 1|col 2|col 3",
+      "",
+      "|column1|column2|column3|",
+      "|column 1|column 2|column 3"
+    ])
+    
+    assert_equal([
+      "| col1  | col2  | col3  | ",
+      "| col 1 | col 2 | col 3 | ",
+      "",
+      "| column1  | column2  | column3  | ",
+      "| column 1 | column 2 | column 3 | "
+    ], actual)
+  end   
+end
+</string>
+	<key>fallbackInput</key>
+	<string>document</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>keyEquivalent</key>
+	<string>^F</string>
+	<key>name</key>
+	<string>format table</string>
+	<key>output</key>
+	<string>replaceSelectedText</string>
+	<key>uuid</key>
+	<string>706F892E-2E8A-476F-8DEF-D8FF93FF183B</string>
+</dict>
+</plist>

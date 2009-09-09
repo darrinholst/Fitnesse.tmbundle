@@ -76,6 +76,7 @@ end
 
 puts format_lines(STDIN.readlines)
 
+=begin
 require "test/unit"
 
 class FormatTableTest &lt; Test::Unit::TestCase
@@ -139,6 +140,7 @@ class FormatTableTest &lt; Test::Unit::TestCase
     ], actual)
   end   
 end
+=end
 </string>
 	<key>fallbackInput</key>
 	<string>document</string>

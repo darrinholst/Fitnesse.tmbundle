@@ -1,0 +1,12 @@
+Use this TextMate bundle to format fitnesse/cucumber tables
+
+Before:
+
+|col1|col2|col3|
+|Some data|Some data|Some other data|
+
+After:
+
+| col1      | col2      | col3            |
+| Some data | Some data | Some other data |
+

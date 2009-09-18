@@ -8,7 +8,7 @@
 	<string>#!/usr/bin/env ruby
 
 def is_table_row(line)
-  /^\|/.match(line)
+  /^\s*\|/.match(line)
 end
 
 def split_row(line)
@@ -31,7 +31,7 @@ def format_table(table)
 
   table.each do |line|
     parts = split_row(line)
-    formatted_line = "| " 
+    formatted_line = "#{table.first.match(/(\s*)|/)[1]}| " 
     
     parts.each_index do |i|
       formatted_line = "#{formatted_line}#{parts[i].ljust(widths[i])} | ";
@@ -91,7 +91,31 @@ class FormatTableTest &lt; Test::Unit::TestCase
       "| col 1 | col 2 | col 3 | "
     ], actual)
   end
-  
+
+  def test_format_single_table_with_whitespace_at_the_beginning
+    actual = format_lines([
+      "  |col1|col2|col3|",
+      "  |col 1|col 2|col 3"
+    ])
+    
+    assert_equal([
+      "  | col1  | col2  | col3  | ",
+      "  | col 1 | col 2 | col 3 | "
+    ], actual)
+  end
+    
+  def test_that_whitespace_of_first_row_is_used
+    actual = format_lines([
+      "  |col1|col2|col3|",
+      "    |col 1|col 2|col 3"
+    ])
+    
+    assert_equal([
+      "  | col1  | col2  | col3  | ",
+      "  | col 1 | col 2 | col 3 | "
+    ], actual)
+  end
+    
   def test_format_table_with_different_number_of_columns
     actual = format_lines([
       "|table header|",
